@@ -49,7 +49,7 @@ This layered separation ensures that the user interface, business logic, machine
 
 # 2. Low-Level Design (LLD)
 
-<img src="/diag/lld.png" width="900"/>
+<img src="/diag/lld.png" width="600"/>
 
 The Low-Level Design describes the internal interaction between the system components and the execution flow of requests within the backend and ML pipeline.
 
@@ -89,7 +89,7 @@ All intermediate results and final outputs are stored in the database for reprod
 
 # 3. Model Training Flow
 
-<img src="/diag/dt.png" width="900" />
+<img src="/diag/dt.png" width="600" />
 
 The model training pipeline is responsible for preparing the dataset and learning the hidden regimes present within the time-series data.
 
