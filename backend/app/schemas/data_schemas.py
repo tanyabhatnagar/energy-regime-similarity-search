@@ -45,3 +45,28 @@ class TrainResponse(BaseModel):
 
 class TransitionMatrixResponse(BaseModel):
     matrix: List[List[float]]
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class SearchHistoryItem(BaseModel):
+    id: int
+    timestamp: datetime
+    start_time: str
+    end_time: str
+    top_k: int
+    results_json: Any
+
+    class Config:
+        from_attributes = True
+
+class SystemStatsResponse(BaseModel):
+    data_points: int
+    active_windows: int
+    regimes_mapped: int
+    system_status: str

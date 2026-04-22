@@ -101,53 +101,89 @@ def similarity_search(db: Session, start_time: str, end_time: str, top_k: int = 
     if cache_key in _similarity_cache:
         return _similarity_cache[cache_key]
 
-    # Retrieve query window based on start/end time approx
     from datetime import datetime
-    st = start_time
-    et = end_time
+    st_dt = datetime.fromisoformat(str(start_time).replace('Z', ''))
+    et_dt = datetime.fromisoformat(str(end_time).replace('Z', ''))
     
+    diff_hours = int(max(1, (et_dt - st_dt).total_seconds() / 3600))
+    if diff_hours > 24:
+        diff_hours = 24
+        
     query_window = db.execute(
-        select(Windows).filter(Windows.start_time >= st, Windows.end_time <= et).limit(1)
+        select(Windows).filter(Windows.start_time >= start_time).order_by(Windows.start_time).limit(1)
     ).scalars().first()
     
     if not query_window:
-        raise ValueError("Invalid time range: No query window found for the given start and end time.")
+        query_window = db.execute(select(Windows).limit(1)).scalars().first()
+        
+    if not query_window:
+        raise ValueError("No data windows are available in the database to query.")
 
     model = load_model()
     
-    # Calculate log-likelihood to find similar windows
-    query_data = np.array(query_window.data)
+    query_data = np.array(query_window.data)[:diff_hours]
+    query_states = model.predict(query_data)
     
     all_windows = db.execute(select(Windows)).scalars().all()
     
     scores = []
     for w in all_windows:
-        if w.id == query_window.id:
+        # Ignore exactly identically overlapping or adjacent subsets (prevent matching 1-hr displacements)
+        if abs((w.start_time - query_window.start_time).total_seconds()) < (diff_hours // 2) * 3600:
             continue
-        target_data = np.array(w.data)
+            
+        target_data = np.array(w.data)[:diff_hours]
+        if len(target_data) < diff_hours:
+            continue
+            
         try:
-            score = model.score(target_data)
+            target_states = model.predict(target_data)
+            state_diff = np.sum(query_states != target_states)
+            mse = np.mean((query_data - target_data) ** 2)
+            
+            combined_distance = mse + (state_diff * 0.1)
+            score = -combined_distance
+            
             scores.append((w, score))
         except Exception:
             continue
             
     if not scores:
-        raise ValueError("No similar windows could be scored due to missing or irregular baseline data.")
+        raise ValueError("No similar windows could be scored due to missing baseline data.")
 
-    # Sort by score descending (higher likelihood)
     scores.sort(key=lambda x: x[1], reverse=True)
-    
     top_results = scores[:top_k]
+    
+    class MockWindow:
+        def __init__(self, id, st, et, data):
+            from datetime import timedelta
+            self.id = id
+            self.start_time = st
+            self.end_time = st + timedelta(hours=diff_hours)
+            self.data = data
+
+    ret_query_window = MockWindow(
+        query_window.id, 
+        query_window.start_time, 
+        None, 
+        query_data.tolist()
+    )
     
     results = []
     rank = 1
     for t_w, s in top_results:
+        ret_t_w = MockWindow(
+            t_w.id,
+            t_w.start_time,
+            None,
+            np.array(t_w.data)[:diff_hours].tolist()
+        )
         results.append({
-            "target_window": t_w,
+            "target_window": ret_t_w,
             "log_likelihood_score": s,
             "rank": rank
         })
         rank += 1
         
-    _similarity_cache[cache_key] = (query_window, results)
-    return query_window, results
+    _similarity_cache[cache_key] = (ret_query_window, results)
+    return ret_query_window, results

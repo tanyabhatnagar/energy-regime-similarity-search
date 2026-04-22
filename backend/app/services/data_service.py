@@ -9,7 +9,7 @@ from app.models.data_models import TimeSeriesData, Windows
 def load_data(db: Session, filepath: str = None, use_default: bool = True):
     if use_default:
         # Generate some dummy data for example purposes if no file provided
-        dates = pd.date_range(start='2020-01-01', periods=1000, freq='1h')
+        dates = pd.date_range(start='2020-01-01', periods=1000, freq='h')
         df = pd.DataFrame({
             'timestamp': dates,
             'load': np.random.normal(5000, 500, 1000),
@@ -18,7 +18,30 @@ def load_data(db: Session, filepath: str = None, use_default: bool = True):
         })
     else:
         df = pd.read_csv(filepath)
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        
+        # Rename standard OPS columns to internal names
+        df = df.rename(columns={
+            "utc_timestamp": "timestamp",
+            "DE_load_actual_entsoe_transparency": "load",
+            "DE_solar_generation_actual": "solar",
+            "DE_wind_generation_actual": "wind"
+        })
+        
+        # Strip all names to lowercase just in case the user named it Load, Solar, Wind
+        df.rename(columns=lambda x: x.lower(), inplace=True)
+
+        found_features = [c for c in ['load', 'solar', 'wind'] if c in df.columns]
+        if not found_features:
+            raise ValueError("CSV must contain at least one of these columns: load, solar, wind")
+            
+        keep_cols = ['timestamp'] + found_features if 'timestamp' in df.columns else found_features
+        df = df[keep_cols]
+
+        if 'timestamp' in df.columns:
+            df['timestamp'] = pd.to_datetime(df['timestamp'])
+            
+        df = df.ffill()
+        df = df.dropna()
 
     # clear old data
     db.execute(delete(TimeSeriesData))
@@ -65,6 +88,9 @@ def preprocess_and_window(db: Session, window_size_hours: int = 24):
     df_scaled = pd.DataFrame(scaled_values, index=df_pivot.index, columns=df_pivot.columns)
 
     # Windowing
+    from app.models.data_models import Regimes, SimilarityResults
+    db.execute(delete(SimilarityResults))
+    db.execute(delete(Regimes))
     db.execute(delete(Windows))
     db.commit()
 

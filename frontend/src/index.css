@@ -4,25 +4,25 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-200 antialiased selection:bg-indigo-500/30;
+    @apply bg-[#041421] text-[#d0d6d6] antialiased selection:bg-[#86b9b0]/30;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-xl overflow-hidden transition-all duration-300;
+    @apply bg-[#041421] border border-[#4c7273] rounded-sm transition-all duration-300 shadow-lg;
   }
   
   .glass-panel {
-    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6;
+    @apply bg-[#042630] border border-[#86b9b0] rounded-sm p-6;
   }
 
   .btn-primary {
-    @apply px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white rounded-lg font-medium shadow-lg shadow-indigo-500/25 transition-all duration-200 focus:ring-2 focus:ring-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply px-4 py-2 bg-[#86b9b0] hover:bg-[#4c7273] border border-[#86b9b0] hover:border-[#86b9b0] text-[#041421] rounded-sm font-bold transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-[#86b9b0] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center;
   }
   
   .input-field {
-    @apply w-full bg-slate-900/50 border border-slate-700/50 rounded-lg px-4 py-2 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all;
+    @apply w-full bg-[#041421] border border-[#4c7273] rounded-sm px-4 py-2 text-[#d0d6d6] placeholder-[#4c7273] focus:outline-none focus:border-[#86b9b0] transition-all;
   }
 }
 

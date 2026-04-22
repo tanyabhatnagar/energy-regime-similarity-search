@@ -18,7 +18,7 @@ export default function TimeSeriesViewer({ data, title = "Time Series Data" }) {
 
   if (!data || data.length === 0) {
     return (
-      <div className="glass-card p-6 h-64 flex flex-col items-center justify-center text-slate-500">
+      <div className="glass-card p-6 h-64 flex flex-col items-center justify-center text-zinc-500">
         <Activity size={32} className="mb-2 opacity-50" />
         <p>No data to display</p>
       </div>

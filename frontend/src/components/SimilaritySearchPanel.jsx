@@ -14,13 +14,13 @@ export default function SimilaritySearchPanel({ onSearch }) {
   return (
     <div className="glass-card p-6">
       <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-        <Search className="text-indigo-400" />
+        <Search className="text-zinc-300" />
         Find Similar Regimes
       </h2>
       
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
         <div>
-          <label className="block text-sm font-medium text-slate-400 mb-2">Start Time</label>
+          <label className="block text-sm font-medium text-zinc-500 mb-2">Start Time</label>
           <input 
             type="datetime-local" 
             value={startTime}
@@ -31,7 +31,7 @@ export default function SimilaritySearchPanel({ onSearch }) {
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-slate-400 mb-2">End Time</label>
+          <label className="block text-sm font-medium text-zinc-500 mb-2">End Time</label>
           <input 
             type="datetime-local" 
             value={endTime}
@@ -42,7 +42,7 @@ export default function SimilaritySearchPanel({ onSearch }) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-400 mb-2">Top K Results</label>
+          <label className="block text-sm font-medium text-zinc-500 mb-2">Top K Results</label>
           <input 
             type="number" 
             min="1"
@@ -54,7 +54,7 @@ export default function SimilaritySearchPanel({ onSearch }) {
           />
         </div>
 
-        <button type="submit" className="btn-primary py-2.5 h-[42px]">
+        <button type="submit" className="btn-primary w-full">
           Search
         </button>
       </form>

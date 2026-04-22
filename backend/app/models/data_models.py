@@ -38,3 +38,14 @@ class SimilarityResults(Base):
     target_window_id = Column(Integer, ForeignKey("windows.id"))
     log_likelihood_score = Column(Float, index=True)
     rank = Column(Integer)
+
+class SearchHistory(Base):
+    __tablename__ = "search_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    start_time = Column(String)
+    end_time = Column(String)
+    top_k = Column(Integer)
+    results_json = Column(JSON)  # serializable dump of the search results
