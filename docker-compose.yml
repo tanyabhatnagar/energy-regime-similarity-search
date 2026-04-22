@@ -11,9 +11,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
 
   api:
-    build: .
+    build: 
+      context: ./backend
     ports:
       - "8000:8000"
     environment:
@@ -22,8 +24,22 @@ services:
     depends_on:
       - db
     volumes:
-      - ./app:/backend/app
+      - ./backend/app:/backend/app
       - model_data:/backend/saved_models
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Provide the backend API URL. In production/EC2, this should ideally be the public IP or domain.
+        # For local Docker setup, you might need to adjust this depending on how you access the frontend.
+        - VITE_API_URL=http://localhost:8000
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    restart: unless-stopped
 
 volumes:
   postgres_data:
